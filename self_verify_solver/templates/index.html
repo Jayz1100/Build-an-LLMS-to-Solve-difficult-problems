@@ -1,0 +1,86 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Self-Verification Solver</title>
+  <style>
+    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; margin: 0; background: #f7f7fb; color: #111827; }
+    .container { max-width: 960px; margin: 0 auto; padding: 24px; }
+    header { position: sticky; top: 0; background: rgba(255,255,255,.9); backdrop-filter: blur(6px); border-bottom: 1px solid #e5e7eb; }
+    h1 { font-size: 20px; margin: 0; }
+    .card { background: white; border: 1px solid #e5e7eb; border-radius: 16px; padding: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    label { display: block; font-size: 14px; color: #374151; margin-bottom: 6px; }
+    input, select, textarea { width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 12px; font-size: 14px; outline: none; }
+    textarea { min-height: 180px; resize: vertical; }
+    button { padding: 10px 16px; border-radius: 12px; border: 1px solid #111827; background: #111827; color: white; cursor: pointer; font-size: 14px; }
+    button:disabled { opacity: .6; cursor: not-allowed; }
+    .muted { color: #6b7280; font-size: 12px; }
+    pre { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; overflow: auto; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container" style="display:flex; align-items:center; justify-content:space-between; padding:12px 24px;">
+      <h1>Self-Verification Solver</h1>
+      <a href="https://github.com" class="muted" target="_blank" rel="noreferrer">Docs</a>
+    </div>
+  </header>
+
+  <main class="container" style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
+    <section class="card">
+      <form method="post" action="/solve">
+        <div class="row">
+          <div>
+            <label>Task Type</label>
+            <select name="task_type">
+              <option value="mcq" {{ 'selected' if task_type=='mcq' else '' }}>MCQ</option>
+              <option value="numeric" {{ 'selected' if task_type=='numeric' else '' }}>Numeric</option>
+              <option value="proof_outline" {{ 'selected' if task_type=='proof_outline' else '' }}>Proof Outline</option>
+              <option value="short_answer" {{ 'selected' if task_type=='short_answer' else '' }}>Short Answer</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <label>Problem</label>
+          <textarea name="problem" placeholder="Paste your problem here…">{{ problem or '' }}</textarea>
+          <div class="muted" style="margin-top:6px;"
+>Tips：The page will go through multiple rounds of solving → verifying → fixing, and output the final JSON answer</div>
+        </div>
+
+        <div style="margin-top:12px; display:flex; gap:8px;">
+          <button type="submit">Solve</button>
+          <span class="muted">Model：deepseek-r1:1.5b · Max Iterations：3</span>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h3 style="margin-top:0;">Final Answer</h3>
+      {% if result %}
+        <div class="muted">Iterations：{{ result.iters }}</div>
+        <pre>{{ result.final_answer | tojson(indent=2) }}</pre>
+      {% else %}
+        <div class="muted">After submitting, the model's final JSON answer will be shown here.</div>
+      {% endif %}
+    </section>
+  </main>
+
+  <div class="container" style="margin-top: 12px;">
+    <section class="card">
+      <h3 style="margin-top:0;">Instructions</h3>
+      <ol>
+        <li>Make sure  <code>Ollama</code>is installed and running, and that the model <code>deepseek-r1:1.5b</code>is available (you can pre-pull with <code>ollama run deepseek-r1:1.5b</code> .</li>
+        <li>Create and activate a virtual environment, install dependencies, then start the service:：<br/>
+          <pre>python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app:app --reload</pre></li>
+        <li>Open <code>http://127.0.0.1:8000</code>in your browser, enter the problem, and click Solve.</li>
+      </ol>
+    </section>
+  </div>
+</body>
+</html>
