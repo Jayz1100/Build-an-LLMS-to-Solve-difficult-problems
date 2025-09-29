@@ -4,6 +4,6 @@
 ## 功能 - 异步并发，大幅提升运行速度 - JSON Schema 校验，保证输出格式 - 错误修复机制，提高健壮性
 
 ## 使用方法 ```bash pip install -r requirements.txt  uvicorn app:app --reload```
-网址信息
-http://127.0.0.1:8000
+
+
 
